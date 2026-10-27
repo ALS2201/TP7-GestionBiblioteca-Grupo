@@ -1,0 +1,7 @@
+*.class
+*.cod
+*.lst
+pid.txt
+opt/
+*.bak
+~*
