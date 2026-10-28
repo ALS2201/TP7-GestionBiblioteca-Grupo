@@ -53,7 +53,60 @@ public void nuevoSocioEstudiante(int p_dniSocio,String p_nombre,String p_carrera
 
 
 }
-
-
+/**
+     * Metodo que devuelve un string segun formato1.
+     */
+    public String listaDeSocios(){
+        int i = 0;
+        for(Socio s : this.getSocio()){
+            i++;
+            return (" " + i + ")_ " + "D.N.I: " + s.getDNI() + " || " + s.getNombre() + " (" + 
+            s.getTipo() + ") " + " || " + "Libros Prestados: " + s.cantidadLibrosPrestados());
+        }
+    }
     
+    /**
+     * Metodo que devuelve el socio buscado por dni, si no lo encuentra devuelve null.
+     */
+    public Socio buscarSocio(int p_dni){
+        for(Socio s : this.getSocio()){
+            if(s.getDni() == p_dni){
+                return s.toString();
+            }else{
+                return null;
+            }
+        }
+    }
+    
+    /**
+     * Metodo que devuelve la lista de titulos encontrados en la biblioteca.
+     */
+    public String listaDeTitulos(){
+        for(Libro l : this.getLibro()){
+            return l.titulo();
+        }
+    }
+    
+    /**
+     * Metodo que devuelve un string segun formato2.
+     */
+    public String listaDeLibros(){
+        int i = 0;
+        for(Libro l : this.getLibro()){
+            i++;
+            return " " + i + ")_" + l.toString() + " || " + "Prestado: (" + l.prestado() + ")";
+        }
+    }
+    
+    /**
+     * Metodo que devuelve un string segun formato3.
+     */
+    public String listaDeDocentesResponsables(){
+        for(Socio s : this.getSocio()){
+            if(s.soyDeLaClase().ignoreEqualsCase("Docente")){
+                return ("* " + "D.N.I: " + s.getDni() + " || " + s.getNombre() + " (Docente) " +
+                " || " + "Libros Prestados: " + s.cantidadLibrosPrestados());
+            }
+        }
+    }
 }
