@@ -29,7 +29,10 @@ public class Estudiante extends Socio
      */
     public Estudiante(int p_dniSocio, String p_nombre, ArrayList <Prestamo> p_prestamos, String p_carrera)
     {
-        super(p_dniSocio, p_nombre, 20, p_prestamos);
+        // Se llama al constructor de Socio con los 3 parametros requeridos
+        super(p_dniSocio, p_nombre, 20);
+        // Se asocia la lista de prestamos usando tu setter
+        this.getPrestamos().addAll(p_prestamos);
         this.setCarrera(p_carrera);
     }
 

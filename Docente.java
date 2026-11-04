@@ -27,9 +27,15 @@ public class Docente extends Socio
      * @param p_prestamos
      * @param p_area
      */
-    public Docente(int p_dniSocio, String p_nombre, ArrayList <Prestamo> p_prestamos, String p_area)
+    public Docente(int p_dniSocio, String p_nombre, ArrayList<Prestamo> p_prestamos, String p_area)
     {
-        super(p_dniSocio, p_nombre, 5, p_prestamos);
+        // 1. Llamamos al constructor de Socio con los 3 parametros requeridos (5 dias de prestamo para el Docente)
+        super(p_dniSocio, p_nombre, 5);
+        
+        // 2. Asociamos la lista de prestamos usando el getter heredado
+        this.getPrestamos().addAll(p_prestamos);
+        
+        // 3. Asignamos el area
         this.setArea(p_area);
     }
 
