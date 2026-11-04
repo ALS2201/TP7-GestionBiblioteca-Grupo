@@ -1,33 +1,82 @@
-
 /**
- * Write a description of class Docente here.
- * 
- * @author (your name) 
- * @version (a version number or a date)
+ * Clase que representa a un docente, que es un tipo de socio.
+ * Los docentes tienen un área de especialización y un préstamo fijo de 5 días.
  */
-public class Docente
+import java.util.*;
+
+public class Docente extends Socio
 {
-    // instance variables - replace the example below with your own
-    private int x;
+    private String area;
 
     /**
-     * Constructor for objects of class Docente
+     * Constructor de la clase para cardinalidad 0
+     * @param p_dniSocio
+     * @param p_nombre
+     * @param p_area
      */
-    public Docente()
+    public Docente(int p_dniSocio, String p_nombre, String p_area)
     {
-        // initialise instance variables
-        x = 0;
+        super(p_dniSocio, p_nombre, 5);
+        this.setArea(p_area);
     }
 
     /**
-     * An example of a method - replace this comment with your own
-     * 
-     * @param  y   a sample parameter for a method
-     * @return     the sum of x and y 
+     * Constructor de la clase para cardinalidad 1...n
+     * @param p_dniSocio
+     * @param p_nombre
+     * @param p_prestamos
+     * @param p_area
      */
-    public int sampleMethod(int y)
+    public Docente(int p_dniSocio, String p_nombre, ArrayList <Prestamo> p_prestamos, String p_area)
     {
-        // put your code here
-        return x + y;
+        super(p_dniSocio, p_nombre, 5, p_prestamos);
+        this.setArea(p_area);
     }
-}
+
+    private void setArea(String p_area) {
+        this.area = p_area;
+    }
+
+    public String getArea() {
+        return this.area;
+    }
+
+    /**
+     * Método que devuelve la clase del socio
+     * @param no recibe parametros
+     * @return retorna un String con el nombre de la clase
+     */
+    public String soyDeLaClase() {
+        return "Docente";
+    }
+
+    /**
+     * Método que determina si el docente es responsable, en base a si
+     * tuvo o tiene algún préstamo vencido.
+     * @param no recibe parametros
+     * @return
+     */
+    public boolean esResponsable(){
+        boolean vencido = false;
+        for(Prestamo p : this.getPrestamos()){
+            Calendar fechaEvaluacion = (p.getFechaDevolucion() != null) ? p.getFechaDevolucion() : Calendar.getInstance();
+            
+            if (p.vencido(fechaEvaluacion)) {
+                vencido = true;
+            }
+        }
+        
+        return this.puedePedir() && (!vencido);
+    }
+
+    /**
+     * Método que permite cambiar los días de préstamo si el docente es responsable
+     * @param p_dias
+     * @return no retorna nada
+     */
+    public void cambiarDiasDePrestamos(int p_dias) {
+        if(this.esResponsable()){
+            this.setDiasPrestamo(p_dias);
+        }
+    }
+}   
