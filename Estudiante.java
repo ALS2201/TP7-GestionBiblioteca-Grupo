@@ -1,33 +1,65 @@
-
 /**
- * Write a description of class Estudiante here.
- * 
- * @author (your name) 
- * @version (a version number or a date)
+ * Clase que representa a un estudiante, que es un tipo de socio.
+ * Los estudiantes tienen una carrera y un préstamo fijo de 20 días.
  */
-public class Estudiante
+import java.util.*;
+
+public class Estudiante extends Socio
 {
-    // instance variables - replace the example below with your own
-    private int x;
+    private String carrera;
 
     /**
-     * Constructor for objects of class Estudiante
+     * Constructor de la clase para cardinalidad 0
+     * @param p_dniSocio
+     * @param p_nombre
+     * @param p_carrera
      */
-    public Estudiante()
+    public Estudiante(int p_dniSocio, String p_nombre, String p_carrera)
     {
-        // initialise instance variables
-        x = 0;
+        super(p_dniSocio, p_nombre, 20);
+        this.setCarrera(p_carrera);
     }
 
     /**
-     * An example of a method - replace this comment with your own
-     * 
-     * @param  y   a sample parameter for a method
-     * @return     the sum of x and y 
+     * Constructor de la clase para cardinalidad 1...n
+     * @param p_dniSocio
+     * @param p_nombre
+     * @param p_prestamos
+     * @param p_carrera
      */
-    public int sampleMethod(int y)
+    public Estudiante(int p_dniSocio, String p_nombre, ArrayList <Prestamo> p_prestamos, String p_carrera)
     {
-        // put your code here
-        return x + y;
+        super(p_dniSocio, p_nombre, 20, p_prestamos);
+        this.setCarrera(p_carrera);
+    }
+
+    private void setCarrera(String p_carrera) {
+        this.carrera = p_carrera;
+    }
+
+    public String getCarrera() {
+        return this.carrera;
+    }
+
+    /**
+     * Método que devuelve la clase del socio
+     * @param no recibe parametros
+     * @return retorna un String con el nombre de la clase
+     */
+    public String soyDeLaClase() {
+        return "Estudiante";
+    }
+
+    /**
+     * Método que determina si el estudiante puede pedir un nuevo libro
+     * @param no recibe parametros
+     * @return retorna true si puede pedir, false si no puede
+     */
+    public boolean puedePedir() {
+        if(super.puedePedir() && (this.cantLibrosPrestados() <= 3)){
+            return true;
+        }else{
+            return false;
+        }
     }
 }
