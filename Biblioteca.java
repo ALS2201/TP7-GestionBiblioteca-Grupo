@@ -201,4 +201,85 @@ public class Biblioteca {
         }
         return listado;
     }
+ // parte nair ordenar 
+ public void devolverLibro(Libro p_libro) throws LibroNoPrestadoException{
+        if(p_libro.prestado() == false){
+            throw new LibroNoPrestadoException("El libro " + p_libro.getTitulo() + " no se puede devolver ya que se encuentra en la biblioteca");
+        }
+        else{
+            //Instanciamos la fecha actual
+            Calendar fechaActual = new GregorianCalendar();
+            //Actualizamos el estado del prestamo del libro
+            p_libro.ultimoPrestamo().registrarFechaDevolucion(fechaActual);
+            //Como socio y libro comparten el mismo prestamo, este objeto se actualiza en ambas listas
+        }
+    }
+    
+    
+    public int cantidadDeSociosPorTipo(String p_objeto){
+        //No lo hacemos, pero aca se podria lanzar exception que diga
+        //"Parametro no coincide con ningun tipo de socio!"
+        int total = 0;
+        for (Socio socio : this.getSocios()){
+            if (socio.soyDeLaClase().equalsIgnoreCase(p_objeto)){
+                total++;
+            }
+        }
+        return total;
+    }
+    
+    
+    
+    public ArrayList<Prestamo> prestamosVencidos() {
+      // Se instancia la lista donde se almacenarán los préstamos vencidos
+      ArrayList<Prestamo> listaPrestamosVencidos = new ArrayList<>();
+    
+      // Se obtiene la fecha actual para realizar la comparación
+      Calendar fechaActual = new GregorianCalendar();
+    
+      // Se recorren los socios registrados y sus préstamos
+      for (Socio socio : this.getSocios()) {
+        for (Prestamo prestamo : socio.getPrestamos()) {
+          // Si el préstamo está vencido, se agrega a la lista
+          if (prestamo.vencido(fechaActual)) {
+            listaPrestamosVencidos.add(prestamo);
+          }
+        }
+      }
+    
+      return listaPrestamosVencidos;
+    }
+    
+    
+    
+    public ArrayList<Docente> docentesResponsables(){
+        ArrayList<Docente> listaDocentesResponsables = new ArrayList<>();
+        
+        //Debemos recorrer la lista de socios, revisar que sean docentes, y si es responsable
+        for (Socio socio : this.getSocios()){
+            if(socio.soyDeLaClase().equalsIgnoreCase("Docente")){
+                //En este IF tambien hay que realizar un casteo, dentro de parentesis obviamente
+                if(((Docente)socio).esResponsable()){
+                    //Hay que hacer un cast a Docente para poder agregarlo a la lista
+                    listaDocentesResponsables.add((Docente) socio);
+                }
+            }
+        }
+        
+        return listaDocentesResponsables;
+    }
+    
+    
+    
+    public String quienTieneElLibro(Libro p_libro) throws LibroNoPrestadoException {
+      // Si el libro no está prestado, se lanza la excepción LibroNoPrestadoException
+      if (p_libro.prestado()) throw new LibroNoPrestadoException("El libro se encuentra en la biblioteca");
+
+      // Se obtiene el último préstamo del libro
+      Prestamo ultimoPrestamo = p_libro.ultimoPrestamo();
+
+      // Se devuelve el nombre del socio relacionado al último préstamo
+      return ultimoPrestamo.getSocio().getNombre();
+    }
+    
 }
