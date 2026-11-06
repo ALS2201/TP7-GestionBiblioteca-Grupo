@@ -13,7 +13,7 @@ El proyecto es desarrollado por 6 integrantes, divididos en tareas específicas:
 ## 🛠️ Requisitos Técnicos y Herramientas
 * **Entorno de Desarrollo:** BlueJ.
 * **Gestión de Tareas:** Tablero de Trello para coordinar el flujo de trabajo.
-* **Reglas de Código:** Uso estricto de colecciones genéricas y todas las clases agrupadas bajo el paquete `biblioteca`.
+
 
 ## ⚙️ Flujo de Trabajo en Git
 Para evitar conflictos de código, cada integrante debe ejecutar este ciclo en la terminal:
