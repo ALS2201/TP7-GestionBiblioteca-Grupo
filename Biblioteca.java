@@ -1,5 +1,5 @@
  
-
+import java.util.ArrayList;
 import java.util.ArrayList;
 
 /**
@@ -44,6 +44,30 @@ public class Biblioteca {
         this.setSocios(p_socios);
     }
 
+ /**
+     * Constructor que inicializa la biblioteca con una colección de libros.
+     *
+     * @param p_nombre Nombre de la biblioteca.
+     * @param p_libros Colección inicial de libros.
+     */
+     public Biblioteca(String p_nombre, ArrayList<Libro> p_libros) {
+        this.setNombre(p_nombre);
+        this.setSocios(new ArrayList<Socio>());
+        this.setLibros(p_libros);
+    }
+
+ /**
+     * Constructor que inicializa la biblioteca con una colección de socios.
+     *
+     * @param p_nombre Nombre de la biblioteca.
+     * @param p_socios Colección inicial de socios.
+     */
+ public Biblioteca(String p_nombre, ArrayList<Socio> p_socios) {
+        this.setNombre(p_nombre);
+        this.setSocios(p_socios);
+        this.setLibros(new ArrayList<Libro>());
+    }
+ 
     // --- Setters y Getters ---
 
     /**
@@ -94,6 +118,8 @@ public class Biblioteca {
         return this.libros;
     }
 
+
+ 
     // --- Métodos de Gestión ---
 
     /**
@@ -121,6 +147,37 @@ public class Biblioteca {
         this.getSocios().add(nuevoEstudiante);
     }
 
+  /**
+     * Registra un nuevo socio docente en la biblioteca.
+     *
+     * @param p_dniSocio DNI del docente.
+     * @param p_nombre Nombre y apellido del docente.
+     * @param p_area Área de trabajo del docente.
+     */
+ public void nuevoSocioDocente(int p_dniSocio,String p_nombre,String p_area) {
+        Docente nuevoDocente =new Docente(p_dniSocio, p_nombre, p_area);
+        this.getSocios().add(nuevoDocente);
+    }
+
+/**
+     * Realiza el préstamo de un libro a un socio.
+     * El préstamo se registra tanto en el socio como en el libro.
+     *
+     * @param p_fechaRetiro Fecha en que se retira el libro.
+     * @param p_socio Socio que solicita el préstamo.
+     * @param p_libro Libro que se desea prestar.
+     * @return true si se realizó el préstamo, false en caso contrario.
+     */
+    public boolean prestarLibro(Calendar p_fechaRetiro,Socio p_socio,Libro p_libro) {
+        if (p_socio.puedePedir() && !p_libro.prestado()) {
+            Prestamo unPrestamo =new Prestamo(p_fechaRetiro, p_socio, p_libro);
+            p_socio.getPrestamos().add(unPrestamo);
+            p_libro.getPrestamos().add(unPrestamo);
+            return true;
+        }
+        return false;
+    } 
+ 
     /**
      * Busca un socio dentro de la colección utilizando su número de DNI.
      * 
