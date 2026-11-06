@@ -1,3 +1,4 @@
+package biblioteca;
 /**
  * Clase que representa a un estudiante, que es un tipo de socio.
  * Los estudiantes tienen una carrera y un préstamo fijo de 20 días.

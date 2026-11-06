@@ -1,3 +1,5 @@
+package biblioteca;
+
 /**
  * Clase que representa a un docente, que es un tipo de socio.
  * Los docentes tienen un área de especialización y un préstamo fijo de 5 días.
