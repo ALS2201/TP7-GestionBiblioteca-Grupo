@@ -4,9 +4,9 @@ Proyecto Integrador de Programación Orientada a Objetos desarrollado en Java. E
 
 ## 👥 Organización del Equipo
 El proyecto es desarrollado por 6 integrantes, divididos en tareas específicas:
-* **Subgrupo 1 (1 integrante):** Implementación de clases `Prestamo` y `Socio`.
+* **Subgrupo 1 (1 integrante):** Implementación de Persistencia e Interfaz Grafica.
 * **Subgrupo 2 (1 integrante):** Implementación de clases `Estudiante` y `Docente`.
-* **Subgrupo 3 (1 integrante):** Implementación de clase `Libro`.
+* **Subgrupo 3 (1 integrante):** Implementación de clases  `Prestamo` , `Socio`y`Libro`.
 * **Subgrupo 4 (3 integrantes):** Implementación de clase `Biblioteca`.
 * **Trabajo Conjunto:** Implementación de la clase final `GestionBiblioteca`.
 
