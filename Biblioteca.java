@@ -1,12 +1,13 @@
 import java.util.Calendar;
 import java.util.ArrayList;
+import java.util.GregorianCalendar;
 
 /**
  * Clase que representa a la Biblioteca.
  * Administra las colecciones de libros y socios (estudiantes y docentes),
  * permitiendo registrar nuevos elementos y emitir listados formateados.
  * 
- * @author 
+ * @author Grupo
  */
 public class Biblioteca {
     
@@ -33,6 +34,10 @@ public class Biblioteca {
     /**
      * Constructor de la clase Biblioteca con colecciones preexistentes.
      * 
+     * NOTA: se eliminaron los constructores (String, ArrayList<Libro>) y
+     * (String, ArrayList<Socio>) porque en Java ambos tienen la misma
+     * "erasure" (ArrayList) y provocan el error "name clash".
+     * 
      * @param p_nombre Nombre de la biblioteca
      * @param p_libros Lista de libros inicial
      * @param p_socios Lista de socios inicial
@@ -41,30 +46,6 @@ public class Biblioteca {
         this.setNombre(p_nombre);
         this.setLibros(p_libros);
         this.setSocios(p_socios);
-    }
-
- /**
-     * Constructor que inicializa la biblioteca con una colección de libros.
-     *
-     * @param p_nombre Nombre de la biblioteca.
-     * @param p_libros Colección inicial de libros.
-     */
-     public Biblioteca(String p_nombre, ArrayList<Libro> p_libros) {
-        this.setNombre(p_nombre);
-        this.setSocios(new ArrayList<Socio>());
-        this.setLibros(p_libros);
-    }
-
- /**
-     * Constructor que inicializa la biblioteca con una colección de socios.
-     *
-     * @param p_nombre Nombre de la biblioteca.
-     * @param p_socios Colección inicial de socios.
-     */
- public Biblioteca(String p_nombre, ArrayList<Socio> p_socios) {
-        this.setNombre(p_nombre);
-        this.setSocios(p_socios);
-        this.setLibros(new ArrayList<Libro>());
     }
  
     // --- Setters y Getters ---
@@ -117,8 +98,6 @@ public class Biblioteca {
         return this.libros;
     }
 
-
- 
     // --- Métodos de Gestión ---
 
     /**
@@ -146,19 +125,19 @@ public class Biblioteca {
         this.getSocios().add(nuevoEstudiante);
     }
 
-  /**
+    /**
      * Registra un nuevo socio docente en la biblioteca.
      *
      * @param p_dniSocio DNI del docente.
      * @param p_nombre Nombre y apellido del docente.
      * @param p_area Área de trabajo del docente.
      */
- public void nuevoSocioDocente(int p_dniSocio,String p_nombre,String p_area) {
-        Docente nuevoDocente =new Docente(p_dniSocio, p_nombre, p_area);
+    public void nuevoSocioDocente(int p_dniSocio, String p_nombre, String p_area) {
+        Docente nuevoDocente = new Docente(p_dniSocio, p_nombre, p_area);
         this.getSocios().add(nuevoDocente);
     }
 
-/**
+    /**
      * Realiza el préstamo de un libro a un socio.
      * El préstamo se registra tanto en el socio como en el libro.
      *
@@ -167,15 +146,31 @@ public class Biblioteca {
      * @param p_libro Libro que se desea prestar.
      * @return true si se realizó el préstamo, false en caso contrario.
      */
-    public boolean prestarLibro(Calendar p_fechaRetiro,Socio p_socio,Libro p_libro) {
+    public boolean prestarLibro(Calendar p_fechaRetiro, Socio p_socio, Libro p_libro) {
         if (p_socio.puedePedir() && !p_libro.prestado()) {
-            Prestamo unPrestamo =new Prestamo(p_fechaRetiro, p_socio, p_libro);
-            p_socio.getPrestamos().add(unPrestamo);
-            p_libro.getPrestamos().add(unPrestamo);
+            Prestamo unPrestamo = new Prestamo(p_fechaRetiro, p_socio, p_libro);
+            p_socio.agregarPrestamo(unPrestamo);
+            p_libro.agregarPrestamo(unPrestamo);
             return true;
         }
         return false;
     } 
+
+    /**
+     * Registra la devolución de un libro con la fecha actual.
+     * 
+     * @param p_libro Libro a devolver
+     * @throws LibroNoPrestadoException si el libro no se encuentra prestado
+     */
+    public void devolverLibro(Libro p_libro) throws LibroNoPrestadoException {
+        if (!p_libro.prestado()) {
+            throw new LibroNoPrestadoException("El libro " + p_libro.getTitulo() 
+                    + " no se puede devolver ya que se encuentra en la biblioteca");
+        }
+        // Socio y libro comparten el mismo objeto Prestamo, por lo que
+        // la fecha queda registrada en ambas fichas.
+        p_libro.ultimoPrestamo().registrarFechaDevolucion(new GregorianCalendar());
+    }
  
     /**
      * Busca un socio dentro de la colección utilizando su número de DNI.
@@ -192,150 +187,146 @@ public class Biblioteca {
         return null; 
     }
 
-    // --- Métodos de Listados ---
-
     /**
-     * Genera un listado en formato texto de todos los socios registrados.
+     * Devuelve la cantidad de socios del tipo indicado ("Docente" o "Estudiante").
      * 
-     * @return String con el detalle enumerado de cada socio y su cantidad de préstamos
+     * @param p_objeto Tipo de socio
+     * @return Cantidad de socios de ese tipo
      */
-    public String listaDeSocios() {
-        String listado = "";
-        int i = 1;
-        for (Socio s : this.getSocios()) {
-            listado += " " + i + ")_ D.N.I: " + s.getDniSocio() + " || " + s.getNombre() + " (" + 
-                       s.soyDeLaClase() + ") || Libros Prestados: " + s.cantLibrosPrestados() + "\n";
-            i++;
-        }
-        return listado;
-    }
-
-    /**
-     * Genera un listado en formato texto con los títulos de todos los libros.
-     * Requiere que la clase Libro tenga implementado el método getTitulo().
-     * 
-     * @return String con los títulos separados por saltos de línea
-     */
-    public String listaDeTitulos() {
-        String listado = "";
-        for (Libro l : this.getLibros()) {
-            listado += l.getTitulo() + "\n"; 
-        }
-        return listado;
-    }
-
-    /**
-     * Genera un listado detallado de todos los libros y su estado actual.
-     * 
-     * @return String con el detalle de cada libro enumerado indicando si está prestado
-     */
-    public String listaDeLibros() {
-        String listado = "";
-        int i = 1;
-        for (Libro l : this.getLibros()) {
-            listado += " " + i + ")_" + l.toString() + " || Prestado: (" + l.prestado() + ")\n";
-            i++;
-        }
-        return listado;
-    }
-
-    /**
-     * Genera un listado exclusivo de los socios de la clase Docente 
-     * que cumplen con la condición de ser responsables (sin préstamos vencidos).
-     * 
-     * @return String con el detalle enumerado de los docentes responsables
-     */
-    public String listaDeDocentesResponsables() {
-        String listado = "";
-        for (Socio s : this.getSocios()) {
-            if (s.soyDeLaClase().equalsIgnoreCase("Docente")) {
-                Docente d = (Docente) s; 
-                if (d.esResponsable()) { 
-                    listado += "* D.N.I: " + d.getDniSocio() + " || " + d.getNombre() + " (Docente) || Libros Prestados: " + d.cantLibrosPrestados() + "\n";
-                }
-            }
-        }
-        return listado;
-    }
- // parte nair ordenar 
- public void devolverLibro(Libro p_libro) throws LibroNoPrestadoException{
-        if(p_libro.prestado() == false){
-            throw new LibroNoPrestadoException("El libro " + p_libro.getTitulo() + " no se puede devolver ya que se encuentra en la biblioteca");
-        }
-        else{
-            //Instanciamos la fecha actual
-            Calendar fechaActual = new GregorianCalendar();
-            //Actualizamos el estado del prestamo del libro
-            p_libro.ultimoPrestamo().registrarFechaDevolucion(fechaActual);
-            //Como socio y libro comparten el mismo prestamo, este objeto se actualiza en ambas listas
-        }
-    }
-    
-    
-    public int cantidadDeSociosPorTipo(String p_objeto){
-        //No lo hacemos, pero aca se podria lanzar exception que diga
-        //"Parametro no coincide con ningun tipo de socio!"
+    public int cantidadDeSociosPorTipo(String p_objeto) {
         int total = 0;
-        for (Socio socio : this.getSocios()){
-            if (socio.soyDeLaClase().equalsIgnoreCase(p_objeto)){
+        for (Socio socio : this.getSocios()) {
+            if (socio.soyDeLaClase().equalsIgnoreCase(p_objeto)) {
                 total++;
             }
         }
         return total;
     }
-    
-    
-    
+
+    /**
+     * Devuelve los préstamos vencidos al día de la fecha. Sólo se consideran
+     * los libros que siguen prestados (sin fecha de devolución).
+     * 
+     * @return Colección de préstamos vencidos
+     */
     public ArrayList<Prestamo> prestamosVencidos() {
-      // Se instancia la lista donde se almacenarán los préstamos vencidos
-      ArrayList<Prestamo> listaPrestamosVencidos = new ArrayList<>();
+        ArrayList<Prestamo> listaPrestamosVencidos = new ArrayList<Prestamo>();
+        Calendar fechaActual = new GregorianCalendar();
     
-      // Se obtiene la fecha actual para realizar la comparación
-      Calendar fechaActual = new GregorianCalendar();
-    
-      // Se recorren los socios registrados y sus préstamos
-      for (Socio socio : this.getSocios()) {
-        for (Prestamo prestamo : socio.getPrestamos()) {
-          // Si el préstamo está vencido, se agrega a la lista
-          if (prestamo.vencido(fechaActual)) {
-            listaPrestamosVencidos.add(prestamo);
-          }
-        }
-      }
-    
-      return listaPrestamosVencidos;
-    }
-    
-    
-    
-    public ArrayList<Docente> docentesResponsables(){
-        ArrayList<Docente> listaDocentesResponsables = new ArrayList<>();
-        
-        //Debemos recorrer la lista de socios, revisar que sean docentes, y si es responsable
-        for (Socio socio : this.getSocios()){
-            if(socio.soyDeLaClase().equalsIgnoreCase("Docente")){
-                //En este IF tambien hay que realizar un casteo, dentro de parentesis obviamente
-                if(((Docente)socio).esResponsable()){
-                    //Hay que hacer un cast a Docente para poder agregarlo a la lista
-                    listaDocentesResponsables.add((Docente) socio);
+        for (Socio socio : this.getSocios()) {
+            for (Prestamo prestamo : socio.getPrestamos()) {
+                if (prestamo.getFechaDevolucion() == null && prestamo.vencido(fechaActual)) {
+                    listaPrestamosVencidos.add(prestamo);
                 }
             }
         }
-        
+        return listaPrestamosVencidos;
+    }
+
+    /**
+     * Devuelve la colección de docentes responsables.
+     * 
+     * @return Colección de docentes responsables
+     */
+    public ArrayList<Docente> docentesResponsables() {
+        ArrayList<Docente> listaDocentesResponsables = new ArrayList<Docente>();
+        for (Socio socio : this.getSocios()) {
+            if (socio.soyDeLaClase().equalsIgnoreCase("Docente")) {
+                Docente docente = (Docente) socio;
+                if (docente.esResponsable()) {
+                    listaDocentesResponsables.add(docente);
+                }
+            }
+        }
         return listaDocentesResponsables;
     }
-    
-    
-    
+
+    /**
+     * Devuelve el nombre del socio que tiene en su poder el libro.
+     * 
+     * @param p_libro Libro a consultar
+     * @return Nombre del socio que lo tiene prestado
+     * @throws LibroNoPrestadoException si el libro se encuentra en la biblioteca
+     */
     public String quienTieneElLibro(Libro p_libro) throws LibroNoPrestadoException {
-      // Si el libro no está prestado, se lanza la excepción LibroNoPrestadoException
-      if (p_libro.prestado()) throw new LibroNoPrestadoException("El libro se encuentra en la biblioteca");
-
-      // Se obtiene el último préstamo del libro
-      Prestamo ultimoPrestamo = p_libro.ultimoPrestamo();
-
-      // Se devuelve el nombre del socio relacionado al último préstamo
-      return ultimoPrestamo.getSocio().getNombre();
+        // CORREGIDO: antes la condición estaba invertida (if prestado -> throw)
+        if (!p_libro.prestado()) {
+            throw new LibroNoPrestadoException("El libro se encuentra en la biblioteca");
+        }
+        return p_libro.ultimoPrestamo().getSocio().getNombre();
     }
-    
+
+    // --- Métodos de Listados ---
+
+    /**
+     * Genera el listado de socios según Formato1, con el total por tipo al final.
+     * 
+     * @return String con el listado de socios
+     */
+    public String listaDeSocios() {
+        String listado = "Lista de Socios:\n\n";
+        int i = 1;
+        for (Socio s : this.getSocios()) {
+            listado += i + ") D.N.I.: " + s.getDniSocio() + " || " + s.getNombre() 
+                     + " (" + s.soyDeLaClase() + ") || Libros Prestados: " 
+                     + s.cantLibrosPrestados() + "\n";
+            i++;
+        }
+        listado += "**************************************\n";
+        listado += " Cantidad de Socios del tipo Estudiante: " 
+                 + this.cantidadDeSociosPorTipo("Estudiante") + "\n";
+        listado += " Cantidad de Socios del tipo Docente: " 
+                 + this.cantidadDeSociosPorTipo("Docente") + "\n";
+        listado += "**************************************\n";
+        return listado;
+    }
+
+    /**
+     * Genera un listado con los títulos de la biblioteca, sin repetir
+     * en caso de haber más de un ejemplar.
+     * 
+     * @return String con los títulos separados por saltos de línea
+     */
+    public String listaDeTitulos() {
+        ArrayList<String> titulosVistos = new ArrayList<String>();
+        String listado = "";
+        for (Libro l : this.getLibros()) {
+            if (!titulosVistos.contains(l.getTitulo())) {
+                titulosVistos.add(l.getTitulo());
+                listado += l.getTitulo() + "\n"; 
+            }
+        }
+        return listado;
+    }
+
+    /**
+     * Genera el listado de libros según Formato2 (Prestado: (Si|No)).
+     * 
+     * @return String con el listado de libros
+     */
+    public String listaDeLibros() {
+        String listado = "Lista de Libros:\n\n";
+        int i = 1;
+        for (Libro l : this.getLibros()) {
+            String estado = l.prestado() ? "Si" : "No";
+            listado += i + ") " + l.toString() + " || Prestado: (" + estado + ")\n";
+            i++;
+        }
+        return listado;
+    }
+
+    /**
+     * Genera el listado de docentes responsables según Formato3.
+     * 
+     * @return String con el listado de docentes responsables
+     */
+    public String listaDeDocentesResponsables() {
+        String listado = "Lista de Docentes Responsables:\n\n";
+        for (Docente d : this.docentesResponsables()) {
+            listado += "* D.N.I.: " + d.getDniSocio() + " || " + d.getNombre() 
+                     + " (" + d.soyDeLaClase() + ") || Libros Prestados: " 
+                     + d.cantLibrosPrestados() + "\n";
+        }
+        return listado;
+    }
 }

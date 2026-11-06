@@ -123,7 +123,7 @@ public class VentanaPrincipal extends JFrame {
 
     private void cargarDatos() {
         // Dos libros
-        biblioteca.nuevoLibro("Progamando con Java", 1, "Fuente", 2008);
+        biblioteca.nuevoLibro("Programando con JAVA", 1, "Fuente", 2008);
         biblioteca.nuevoLibro("POO", 2, "TechBooks", 2009);
 
         // Un docente y dos estudiantes
@@ -131,13 +131,8 @@ public class VentanaPrincipal extends JFrame {
         biblioteca.nuevoSocioEstudiante(2222, "Mateo", "Biologia");
         biblioteca.nuevoSocioEstudiante(3333, "Fabricio", "Lic. En Sistemas");
 
-        // Préstamo viejo (febrero de 2024) que se devuelve hoy, así queda un préstamo vencido de ejemplo
-        biblioteca.prestarLibro(new GregorianCalendar(2024, 1, 10), biblioteca.getArraySocios().get(0), biblioteca.getArrayLibros().get(1));
-        try {
-            biblioteca.devolverLibro(biblioteca.getArrayLibros().get(1));
-        } catch (LibroNoPrestadoException e) {
-            mostrarError(e.getMessage());
-        }
+        // Préstamo viejo (febrero de 2024) que NO se devuelve, así queda un préstamo vencido de ejemplo
+        biblioteca.prestarLibro(new GregorianCalendar(2024, 1, 10), biblioteca.getSocios().get(0), biblioteca.getLibros().get(1));
     }
 
     // =====================================================================
@@ -180,14 +175,14 @@ public class VentanaPrincipal extends JFrame {
         // 1) Ver qué libro está seleccionado
         Libro libro = libroSeleccionado();
         if (libro == null) return;
-        if (biblioteca.getArraySocios().isEmpty()) {
+        if (biblioteca.getSocios().isEmpty()) {
             mostrarError("No hay socios cargados.");
             return;
         }
 
         // 2) Armar un desplegable con todos los socios
         JComboBox<String> comboSocios = new JComboBox<>();
-        for (Socio s : biblioteca.getArraySocios()) {
+        for (Socio s : biblioteca.getSocios()) {
             comboSocios.addItem(s.getNombre() + "  -  " + s.soyDeLaClase());
         }
         int respuesta = JOptionPane.showConfirmDialog(this, comboSocios, "Prestar \"" + libro.getTitulo() + "\" a:",
@@ -195,7 +190,7 @@ public class VentanaPrincipal extends JFrame {
         if (respuesta != JOptionPane.OK_OPTION) return;
 
         // 3) Intentar el préstamo con la fecha de hoy
-        Socio socio = biblioteca.getArraySocios().get(comboSocios.getSelectedIndex());
+        Socio socio = biblioteca.getSocios().get(comboSocios.getSelectedIndex());
         if (biblioteca.prestarLibro(Calendar.getInstance(), socio, libro)) {
             actualizarDatos();
             mostrarMensaje("Préstamo de \"" + libro.getTitulo() + "\" a " + socio.getNombre() + " registrado.");
@@ -255,7 +250,7 @@ public class VentanaPrincipal extends JFrame {
         // --- Libros ---
         modeloLibros.setRowCount(0); // se borran las filas viejas
         int cantPrestados = 0;
-        for (Libro libro : biblioteca.getArrayLibros()) {
+        for (Libro libro : biblioteca.getLibros()) {
             if (libro.prestado()) cantPrestados++;
             String estado = libro.prestado() ? "Prestado" : "Disponible";
             modeloLibros.addRow(new Object[]{libro.getTitulo(), libro.getEdicion(), libro.getEditorial(), libro.getAnio(), estado});
@@ -263,7 +258,7 @@ public class VentanaPrincipal extends JFrame {
 
         // --- Socios ---
         modeloSocios.setRowCount(0);
-        for (Socio socio : biblioteca.getArraySocios()) {
+        for (Socio socio : biblioteca.getSocios()) {
             // Los docentes tienen área y los estudiantes carrera
             String areaOCarrera;
             if (socio instanceof Docente) {
@@ -279,7 +274,7 @@ public class VentanaPrincipal extends JFrame {
         modeloPrestamos.setRowCount(0);
         modeloVencidos.setRowCount(0);
         ArrayList<Prestamo> vencidos = biblioteca.prestamosVencidos();
-        for (Libro libro : biblioteca.getArrayLibros()) {
+        for (Libro libro : biblioteca.getLibros()) {
             for (Prestamo prestamo : libro.getPrestamos()) {
                 boolean estaVencido = vencidos.contains(prestamo);
                 Calendar devolucion = prestamo.getFechaDevolucion();
@@ -309,9 +304,9 @@ public class VentanaPrincipal extends JFrame {
         }
 
         // --- Números de las tarjetas del tablero ---
-        lblNumeros[0].setText("" + biblioteca.getArrayLibros().size());
-        lblNumeros[1].setText("" + (biblioteca.getArrayLibros().size() - cantPrestados));
-        lblNumeros[2].setText("" + biblioteca.getArraySocios().size());
+        lblNumeros[0].setText("" + biblioteca.getLibros().size());
+        lblNumeros[1].setText("" + (biblioteca.getLibros().size() - cantPrestados));
+        lblNumeros[2].setText("" + biblioteca.getSocios().size());
         lblNumeros[3].setText("" + vencidos.size());
     }
 
@@ -775,7 +770,7 @@ public class VentanaPrincipal extends JFrame {
             return null;
         }
         // La fila de la tabla es la misma posición que en la lista de libros
-        return biblioteca.getArrayLibros().get(fila);
+        return biblioteca.getLibros().get(fila);
     }
 
     /** Muestra un mensaje de confirmación en verde abajo de la ventana. */
