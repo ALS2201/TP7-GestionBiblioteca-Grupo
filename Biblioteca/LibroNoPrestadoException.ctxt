@@ -1,5 +1,7 @@
 #BlueJ class context
 comment0.target=LibroNoPrestadoException
+comment0.text=\r\n\ Excepci\u00F3n\ que\ se\ lanza\ cuando\ se\ intenta\ devolver\ un\ libro,\ o\ consultar\ qui\u00E9n\ lo\ tiene,\r\n\ y\ ese\ libro\ no\ est\u00E1\ prestado\ (est\u00E1\ en\ la\ biblioteca).\r\n\ Es\ una\ excepci\u00F3n\ "chequeada"\ (extiende\ Exception)\:\ quien\ llame\ al\ m\u00E9todo\ est\u00E1\ obligado\ a\ atraparla.\r\n\r\n\ @author\ Grupo\r\n
 comment1.params=mensaje
 comment1.target=LibroNoPrestadoException(java.lang.String)
+comment1.text=@param\ mensaje\ Texto\ que\ explica\ el\ motivo;\ se\ muestra\ al\ usuario\ en\ la\ interfaz
 numComments=2
