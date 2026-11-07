@@ -1,0 +1,20 @@
+#BlueJ class context
+#Sat Nov 07 19:15:30 ART 2026
+comment0.target=Docente
+comment1.params=p_dniSocio p_nombre p_area
+comment1.target=Docente(int, java.lang.String, java.lang.String)
+comment1.text=\r\n Constructor de la clase para cardinalidad 0\r\n @param p_dniSocio\r\n @param p_nombre\r\n @param p_area\r\n
+comment2.params=p_dniSocio p_nombre p_prestamos p_area
+comment2.target=Docente(int, java.lang.String, java.util.ArrayList, java.lang.String)
+comment2.text=\r\n Constructor de la clase para cardinalidad 1...n\r\n @param p_dniSocio\r\n @param p_nombre\r\n @param p_prestamos\r\n @param p_area\r\n
+comment3.params=p_area
+comment3.target=void setArea(java.lang.String)
+comment4.target=java.lang.String getArea()
+comment5.target=java.lang.String soyDeLaClase()
+comment5.text=\r\n M\u00E9todo que devuelve la clase del socio\r\n @param no recibe parametros\r\n @return retorna un String con el nombre de la clase\r\n
+comment6.target=boolean esResponsable()
+comment6.text=\r\n M\u00E9todo que determina si el docente es responsable, en base a si\r\n tuvo o tiene alg\u00FAn pr\u00E9stamo vencido.\r\n @param no recibe parametros\r\n @return\r\n
+comment7.params=p_dias
+comment7.target=void cambiarDiasDePrestamos(int)
+comment7.text=\r\n M\u00E9todo que permite cambiar los d\u00EDas de pr\u00E9stamo si el docente es responsable\r\n @param p_dias\r\n @return no retorna nada\r\n
+numComments=8
