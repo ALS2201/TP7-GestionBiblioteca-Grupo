@@ -11,8 +11,11 @@ import java.util.*;
  * @author Grupo 
  * @version 1.1
  */
-public abstract class Socio
+// Serializable: Docente y Estudiante lo heredan, así que también se pueden guardar
+public abstract class Socio implements java.io.Serializable
 {
+    private static final long serialVersionUID = 1L;
+
     // Atributos
     /** Numero de documento del socio */
     private int dniSocio;

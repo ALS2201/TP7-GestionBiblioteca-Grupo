@@ -12,8 +12,11 @@ import java.text.SimpleDateFormat;
  * @author Grupo 
  * @version 1.1
  */
-public class Prestamo
+// Serializable: necesario para guardar los préstamos (las fechas Calendar ya lo son)
+public class Prestamo implements java.io.Serializable
 {
+    private static final long serialVersionUID = 1L;
+
     // Atributos
     /** Fecha en la que se realizo el retiro del libro */
     private Calendar fechaRetiro;

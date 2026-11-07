@@ -60,7 +60,7 @@ public class Estudiante extends Socio
      * @return retorna true si puede pedir, false si no puede
      */
     public boolean puedePedir() {
-        if(super.puedePedir() && (this.cantLibrosPrestados() <= 3)){
+        if(super.puedePedir() && (this.cantLibrosPrestados() < 3)){
             return true;
         }else{
             return false;

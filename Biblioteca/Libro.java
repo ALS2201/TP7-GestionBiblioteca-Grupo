@@ -8,8 +8,11 @@ import java.util.*;
  * @author Grupo 
  * @version 1.0
  */
-public class Libro
+// Serializable: necesario para guardar el libro (y su ficha de préstamos) en el archivo
+public class Libro implements java.io.Serializable
 {
+    private static final long serialVersionUID = 1L;
+
     // Atributos
     /** Titulo del libro */
     private String titulo;

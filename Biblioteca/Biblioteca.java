@@ -10,7 +10,10 @@ import java.util.GregorianCalendar;
  * 
  * @author Grupo
  */
-public class Biblioteca {
+// Serializable: permite guardar toda la biblioteca (libros, socios y préstamos) en un archivo
+public class Biblioteca implements java.io.Serializable {
+    private static final long serialVersionUID = 1L;
+
     
     // Atributos
     
@@ -122,6 +125,9 @@ public class Biblioteca {
      * @param p_carrera Carrera que cursa el estudiante
      */
     public void nuevoSocioEstudiante(int p_dniSocio, String p_nombre, String p_carrera) {
+        if (this.buscarSocio(p_dniSocio) != null) {
+            throw new IllegalArgumentException("Ya existe un socio con el D.N.I. " + p_dniSocio);
+        }
         Estudiante nuevoEstudiante = new Estudiante(p_dniSocio, p_nombre, p_carrera);
         this.getSocios().add(nuevoEstudiante);
     }
@@ -134,6 +140,9 @@ public class Biblioteca {
      * @param p_area Área de trabajo del docente.
      */
     public void nuevoSocioDocente(int p_dniSocio, String p_nombre, String p_area) {
+        if (this.buscarSocio(p_dniSocio) != null) {
+            throw new IllegalArgumentException("Ya existe un socio con el D.N.I. " + p_dniSocio);
+        }
         Docente nuevoDocente = new Docente(p_dniSocio, p_nombre, p_area);
         this.getSocios().add(nuevoDocente);
     }

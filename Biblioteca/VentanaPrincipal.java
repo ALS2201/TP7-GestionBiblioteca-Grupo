@@ -33,8 +33,10 @@ public class VentanaPrincipal extends JFrame {
     private static final String FUENTE = "Segoe UI";
 
     // ---------- Datos ----------
-    // La biblioteca (clase del modelo) que guarda libros, socios y préstamos
-    private final Biblioteca biblioteca = new Biblioteca("Biblioteca Central");
+    // Archivo donde se guarda todo lo cargado en la interfaz (en la carpeta del usuario, para que sea siempre el mismo)
+    private static final java.io.File ARCHIVO = new java.io.File(System.getProperty("user.home"), "biblioteca.dat");
+    // La biblioteca (clase del modelo): se carga del archivo o se crea con datos de ejemplo
+    private Biblioteca biblioteca;
     // Para mostrar las fechas como dd/MM/aaaa
     private final SimpleDateFormat formatoFecha = new SimpleDateFormat("dd/MM/yyyy");
 
@@ -66,8 +68,12 @@ public class VentanaPrincipal extends JFrame {
     public VentanaPrincipal() {
         super("Gestión de Biblioteca");
 
-        // Paso 1: cargar libros y socios de ejemplo
-        cargarDatos();
+        // Paso 1: cargar lo guardado; si no hay archivo (o falla), usar los datos de ejemplo
+        biblioteca = leerArchivo();
+        if (biblioteca == null) {
+            biblioteca = new Biblioteca("Biblioteca Central");
+            cargarDatos();
+        }
 
         // Paso 2: el panel raíz tiene el menú a la izquierda y el contenido en el centro
         JPanel raiz = new JPanel(new BorderLayout());
@@ -134,6 +140,47 @@ public class VentanaPrincipal extends JFrame {
 
         // Préstamo viejo (febrero de 2024) que NO se devuelve, así queda un préstamo vencido de ejemplo
         biblioteca.prestarLibro(new GregorianCalendar(2024, 1, 10), biblioteca.getSocios().get(0), biblioteca.getLibros().get(1));
+    }
+
+    // =====================================================================
+    //  PERSISTENCIA (guardar y leer el archivo)
+    // =====================================================================
+
+    /** Lee la biblioteca guardada. Devuelve null si no hay archivo o no se pudo leer. */
+    private Biblioteca leerArchivo() {
+        if (!ARCHIVO.exists()) return null;
+        // el FileInputStream va como recurso propio: si el encabezado es inválido hay que cerrarlo para poder renombrar en Windows
+        try (java.io.FileInputStream fis = new java.io.FileInputStream(ARCHIVO);
+             java.io.ObjectInputStream in = new java.io.ObjectInputStream(fis)) {
+            return (Biblioteca) in.readObject();
+        } catch (Exception e) {
+            // Archivo dañado o de una versión vieja: se guarda como .bak para no pisarlo y se arranca de cero
+            ARCHIVO.renameTo(new java.io.File(ARCHIVO.getPath() + ".bak"));
+            return null;
+        }
+    }
+
+    /**
+     * Guarda toda la biblioteca (libros, socios y préstamos) en el archivo.
+     * Se llama después de cada cambio hecho desde la interfaz, así nada se pierde al cerrar.
+     * Se escribe primero en un archivo temporal y recién al terminar se lo renombra:
+     * de esa forma, si el programa se cierra a mitad de la escritura, el archivo anterior queda intacto.
+     */
+    private void guardarArchivo() {
+        java.io.File temporal = new java.io.File(ARCHIVO.getPath() + ".tmp");
+        try (java.io.ObjectOutputStream out = new java.io.ObjectOutputStream(new java.io.FileOutputStream(temporal))) {
+            out.writeObject(biblioteca);
+        } catch (java.io.IOException e) {
+            // Si no se puede guardar se avisa, pero el programa sigue funcionando
+            mostrarError("No se pudieron guardar los datos: " + e.getMessage());
+            return;
+        }
+        try {
+            // El temporal ya está cerrado (try-with-resources): se reemplaza el archivo real de una sola vez
+            java.nio.file.Files.move(temporal.toPath(), ARCHIVO.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+        } catch (java.io.IOException e) {
+            mostrarError("No se pudieron guardar los datos: " + e.getMessage());
+        }
     }
 
     // =====================================================================
@@ -248,6 +295,9 @@ public class VentanaPrincipal extends JFrame {
 
     /** Vuelve a llenar todas las tablas y los números del tablero con los datos actuales. */
     private void actualizarDatos() {
+        // Cada vez que cambia algo se refresca la pantalla, así que también se guarda en el archivo
+        guardarArchivo();
+
         // --- Libros ---
         modeloLibros.setRowCount(0); // se borran las filas viejas
         int cantPrestados = 0;
@@ -679,6 +729,8 @@ public class VentanaPrincipal extends JFrame {
                 accion.run();
             } catch (NumberFormatException ex) {
                 mostrarError("Ingresá un número válido.");
+            } catch (IllegalArgumentException ex) { // DNI repetido (va después de NumberFormatException, su subclase)
+                mostrarError(ex.getMessage());
             } catch (LibroNoPrestadoException ex) {
                 mostrarError(ex.getMessage());
             } catch (Exception ex) {
