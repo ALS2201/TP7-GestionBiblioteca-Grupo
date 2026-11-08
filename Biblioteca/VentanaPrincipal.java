@@ -21,16 +21,25 @@ public class VentanaPrincipal extends JFrame {
     private interface Accion { void run() throws Exception; }
 
     // ---------- Colores y fuente que se usan en toda la ventana ----------
-    private static final Color COLOR_MENU = new Color(0x1E1B4B);        // fondo del menú lateral
-    private static final Color COLOR_MENU_ACTIVO = new Color(0x4338CA); // opción seleccionada del menú
-    private static final Color COLOR_PRINCIPAL = new Color(0x6366F1);   // color de los botones principales
-    private static final Color COLOR_FONDO = new Color(0xF4F5FB);       // fondo gris claro de las páginas
-    private static final Color COLOR_TEXTO = new Color(0x1F2937);
-    private static final Color COLOR_TEXTO_SUAVE = new Color(0x6B7280);
-    private static final Color VERDE = new Color(0x16A34A);
-    private static final Color ROJO = new Color(0xDC2626);
-    private static final Color AMARILLO = new Color(0xD97706);
+    private static final Color COLOR_MENU = new Color(0x3B2418);        // madera oscura (nogal) del menú lateral
+    private static final Color COLOR_MENU_ACTIVO = new Color(0x6B4226); // opción seleccionada (cuero)
+    private static final Color COLOR_MENU_HOVER = new Color(0x4F3322);  // opción bajo el mouse
+    private static final Color COLOR_PRINCIPAL = new Color(0x7B2D26);   // bordó de las tapas de cuero (botones principales)
+    private static final Color COLOR_FONDO = new Color(0xF5EEDC);       // color pergamino de las páginas
+    private static final Color PAPEL = new Color(0xFFFDF7);             // papel de las tablas y tarjetas
+    private static final Color PAPEL_ALT = new Color(0xFAF4E4);         // filas alternadas de las tablas
+    private static final Color BORDE = new Color(0xD9C7A0);             // bordes color papel viejo
+    private static final Color ENCABEZADO = new Color(0xE8D9B8);        // encabezado de las tablas
+    private static final Color SELECCION = new Color(0xEFDDB4);         // fila seleccionada
+    private static final Color MARRON_TEXTO = new Color(0x5A3A22);      // texto de encabezados y botones claros
+    private static final Color DORADO = new Color(0xC9A66B);            // detalles dorados
+    private static final Color COLOR_TEXTO = new Color(0x2B1D14);
+    private static final Color COLOR_TEXTO_SUAVE = new Color(0x7A6552);
+    private static final Color VERDE = new Color(0x2F6B3A);             // verde de lámpara de biblioteca
+    private static final Color ROJO = new Color(0xA4262C);
+    private static final Color AMARILLO = new Color(0xB7791F);
     private static final String FUENTE = "Segoe UI";
+    private static final String FUENTE_TITULO = "Georgia";               // letra con serif, como en los libros
 
     // ---------- Datos ----------
     // Archivo donde se guarda todo lo cargado en la interfaz (en la carpeta del usuario, para que sea siempre el mismo)
@@ -83,13 +92,14 @@ public class VentanaPrincipal extends JFrame {
         panelPaginas.setBackground(COLOR_FONDO);
         panelPaginas.add(crearPaginaInicio(), "Inicio");
 
-        panelPaginas.add(crearPagina("Libros", "Catálogo y préstamos. Seleccioná un libro para operar.", tablaLibros,
+        panelPaginas.add(crearPagina("Catálogo de libros", "Ejemplares de la biblioteca. Seleccioná uno para prestarlo, devolverlo o quitarlo.", tablaLibros,
             crearBoton("Agregar libro", true, this::agregarLibro),
             crearBoton("Prestar", false, this::prestarLibro),
             crearBoton("Devolver", false, this::devolverLibro),
-            crearBoton("¿Quién lo tiene?", false, this::consultarQuienTiene)), "Libros");
+            crearBoton("¿Quién lo tiene?", false, this::consultarQuienTiene),
+            crearBoton("Quitar libro", false, this::quitarLibro)), "Libros");
 
-        panelPaginas.add(crearPagina("Socios", "Docentes y estudiantes registrados.", tablaSocios,
+        panelPaginas.add(crearPagina("Socios lectores", "Docentes y estudiantes registrados en la biblioteca.", tablaSocios,
             crearBoton("Nuevo docente", true, this::agregarDocente),
             crearBoton("Nuevo estudiante", false, this::agregarEstudiante)), "Socios");
 
@@ -97,7 +107,7 @@ public class VentanaPrincipal extends JFrame {
         chkSoloVencidos.setOpaque(false);
         chkSoloVencidos.setFont(new Font(FUENTE, Font.BOLD, 13));
         chkSoloVencidos.addActionListener(e -> actualizarDatos());
-        panelPaginas.add(crearPagina("Préstamos", "Historial completo de préstamos.", tablaPrestamos, chkSoloVencidos), "Préstamos");
+        panelPaginas.add(crearPagina("Registro de préstamos", "Fichas de todos los préstamos realizados.", tablaPrestamos, chkSoloVencidos), "Préstamos");
 
         panelPaginas.add(crearPagina("Docentes responsables", "Docentes sin préstamos vencidos. Podés cambiar sus días de préstamo.", tablaResponsables,
             crearBoton("Cambiar días de préstamo", true, this::cambiarDiasPrestamo)), "Docentes");
@@ -196,6 +206,26 @@ public class VentanaPrincipal extends JFrame {
         biblioteca.nuevoLibro(datos[0], Integer.parseInt(datos[1]), datos[2], Integer.parseInt(datos[3]));
         actualizarDatos();
         mostrarMensaje("Libro \"" + datos[0] + "\" agregado.");
+    }
+
+    /** Quita del catálogo el libro seleccionado (pide confirmación; no permite quitar uno prestado). */
+    private void quitarLibro() {
+        Libro libro = libroSeleccionado();
+        if (libro == null) return;
+
+        if (libro.prestado()) {
+            mostrarError("No se puede quitar \"" + libro.getTitulo() + "\" porque está prestado. Primero hay que devolverlo.");
+            return;
+        }
+        int respuesta = JOptionPane.showConfirmDialog(this,
+                "¿Seguro que querés quitar \"" + libro.getTitulo() + "\" del catálogo?",
+                "Quitar libro", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+        if (respuesta != JOptionPane.YES_OPTION) return;
+
+        if (biblioteca.quitarLibro(libro)) {
+            actualizarDatos();
+            mostrarMensaje("Libro \"" + libro.getTitulo() + "\" quitado.");
+        }
     }
 
     /** Pide los datos de un docente nuevo y lo agrega. */
@@ -380,13 +410,13 @@ public class VentanaPrincipal extends JFrame {
                 g2.setColor(COLOR_PRINCIPAL);
                 g2.fillRoundRect(0, 4, 36, 36, 12, 12);
                 g2.setColor(Color.WHITE);
-                g2.setFont(new Font(FUENTE, Font.BOLD, 22));
+                g2.setFont(new Font(FUENTE_TITULO, Font.BOLD, 22));
                 g2.drawString("B", 11, 31);
                 g2.dispose();
                 super.paintComponent(g); // dibuja el texto "Biblioteca"
             }
         };
-        logo.setFont(new Font(FUENTE, Font.BOLD, 20));
+        logo.setFont(new Font(FUENTE_TITULO, Font.BOLD, 20));
         logo.setForeground(Color.WHITE);
         logo.setBorder(new EmptyBorder(0, 48, 0, 0)); // deja lugar para el cuadrado
         logo.setPreferredSize(new Dimension(200, 44));
@@ -394,16 +424,16 @@ public class VentanaPrincipal extends JFrame {
         logo.setAlignmentX(LEFT_ALIGNMENT);
         menu.add(logo);
 
-        JLabel subtitulo = new JLabel("Central · Gestión");
+        JLabel subtitulo = new JLabel("Catálogo · Préstamos · Socios");
         subtitulo.setFont(new Font(FUENTE, Font.PLAIN, 12));
-        subtitulo.setForeground(new Color(0xA5B4FC));
+        subtitulo.setForeground(new Color(0xD9B98A));
         subtitulo.setBorder(new EmptyBorder(0, 48, 0, 0));
         subtitulo.setAlignmentX(LEFT_ALIGNMENT);
         menu.add(subtitulo);
         menu.add(Box.createVerticalStrut(28));
 
         // Un botón por cada página: {nombre de la página, texto del botón}
-        String[][] opciones = {{"Inicio", "Inicio"}, {"Libros", "Libros"}, {"Socios", "Socios"},
+        String[][] opciones = {{"Inicio", "Inicio"}, {"Libros", "Catálogo de libros"}, {"Socios", "Socios"},
                                {"Préstamos", "Préstamos"}, {"Docentes", "Docentes responsables"}};
         for (String[] opcion : opciones) {
             BotonMenu boton = new BotonMenu(opcion[1], opcion[0]);
@@ -414,10 +444,45 @@ public class VentanaPrincipal extends JFrame {
 
         // El espacio flexible empuja el botón Salir hacia abajo de todo
         menu.add(Box.createVerticalGlue());
+        menu.add(crearEstanteria());
+        menu.add(Box.createVerticalStrut(14));
         BotonMenu salir = new BotonMenu("Salir", null);
         salir.addActionListener(e -> System.exit(0));
         menu.add(salir);
         return menu;
+    }
+
+    /** Dibuja una pequeña estantería con libros de colores para decorar el menú. */
+    private JPanel crearEstanteria() {
+        JPanel estanteria = new JPanel() {
+            // {ancho, alto} de cada lomo y su color
+            private final int[][] medidas = {{16, 54}, {12, 64}, {18, 48}, {14, 60}, {20, 52}, {12, 68}, {16, 56}, {14, 46}};
+            private final Color[] colores = {new Color(0x7B2D26), new Color(0x2F6B3A), new Color(0xB7791F), new Color(0x2F5D8A),
+                                             new Color(0x5B3A6B), new Color(0x8C4A2F), new Color(0x3F6F6B), new Color(0xA4262C)};
+
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = activarSuavizado(g);
+                int tabla = getHeight() - 10; // y donde apoyan los libros
+                int x = 8;
+                for (int i = 0; i < medidas.length; i++) {
+                    int ancho = medidas[i][0], alto = medidas[i][1];
+                    g2.setColor(colores[i]);
+                    g2.fillRoundRect(x, tabla - alto, ancho, alto, 4, 4);
+                    g2.setColor(new Color(255, 255, 255, 70)); // franja dorada del lomo
+                    g2.fillRect(x, tabla - alto + 8, ancho, 2);
+                    g2.fillRect(x, tabla - 12, ancho, 2);
+                    x += ancho + 2;
+                }
+                g2.setColor(new Color(0xA9743F)); // tabla de madera
+                g2.fillRoundRect(0, tabla, getWidth(), 8, 6, 6);
+                g2.dispose();
+            }
+        };
+        estanteria.setOpaque(false);
+        estanteria.setPreferredSize(new Dimension(200, 84));
+        estanteria.setMaximumSize(new Dimension(Integer.MAX_VALUE, 84));
+        estanteria.setAlignmentX(LEFT_ALIGNMENT);
+        return estanteria;
     }
 
     /** Muestra la página pedida y marca como activo el botón del menú correspondiente. */
@@ -434,7 +499,7 @@ public class VentanaPrincipal extends JFrame {
         JPanel pagina = new JPanel(new BorderLayout(0, 20));
         pagina.setBackground(COLOR_FONDO);
         pagina.setBorder(new EmptyBorder(24, 24, 8, 24));
-        pagina.add(crearTitulo("Tablero", "Resumen de la " + biblioteca.getNombre() + "."), BorderLayout.NORTH);
+        pagina.add(conFiligrana(crearTitulo("Mostrador", "Resumen de la " + biblioteca.getNombre() + ".")), BorderLayout.NORTH);
 
         JPanel centro = new JPanel(new BorderLayout(0, 20));
         centro.setOpaque(false);
@@ -442,8 +507,8 @@ public class VentanaPrincipal extends JFrame {
         // Fila con las 4 tarjetas (1 fila, 4 columnas)
         JPanel tarjetas = new JPanel(new GridLayout(1, 4, 16, 0));
         tarjetas.setOpaque(false);
-        String[] nombres = {"Libros en total", "Disponibles", "Socios", "Préstamos vencidos"};
-        Color[] colores = {COLOR_PRINCIPAL, VERDE, new Color(0x0EA5E9), ROJO};
+        String[] nombres = {"Ejemplares en total", "En estantería", "Socios lectores", "Préstamos vencidos"};
+        Color[] colores = {COLOR_PRINCIPAL, VERDE, new Color(0x2F5D8A), ROJO};
         for (int i = 0; i < 4; i++) {
             tarjetas.add(crearTarjeta(nombres[i], lblNumeros[i], colores[i]));
         }
@@ -452,7 +517,7 @@ public class VentanaPrincipal extends JFrame {
 
         // Debajo de las tarjetas, la tabla de vencidos con su título
         JLabel tituloLista = new JLabel("Préstamos vencidos");
-        tituloLista.setFont(new Font(FUENTE, Font.BOLD, 16));
+        tituloLista.setFont(new Font(FUENTE_TITULO, Font.BOLD, 17));
         tituloLista.setForeground(COLOR_TEXTO);
         tituloLista.setBorder(new EmptyBorder(0, 2, 8, 0));
         JPanel lista = new JPanel(new BorderLayout());
@@ -482,9 +547,28 @@ public class VentanaPrincipal extends JFrame {
         }
         arriba.add(panelBotones, BorderLayout.EAST);
 
-        pagina.add(arriba, BorderLayout.NORTH);
+        pagina.add(conFiligrana(arriba), BorderLayout.NORTH);
         pagina.add(envolverTabla(tabla), BorderLayout.CENTER);
         return pagina;
+    }
+
+    /** Agrega debajo del componente una doble línea dorada, como el adorno de un libro antiguo. */
+    private JPanel conFiligrana(JComponent contenido) {
+        JPanel panel = new JPanel(new BorderLayout(0, 10));
+        panel.setOpaque(false);
+        panel.add(contenido, BorderLayout.CENTER);
+        JPanel linea = new JPanel() {
+            protected void paintComponent(Graphics g) {
+                g.setColor(DORADO);
+                g.fillRect(0, 0, getWidth(), 2);
+                g.setColor(new Color(0xE0C898));
+                g.fillRect(0, 5, getWidth(), 1);
+            }
+        };
+        linea.setOpaque(false);
+        linea.setPreferredSize(new Dimension(0, 7));
+        panel.add(linea, BorderLayout.SOUTH);
+        return panel;
     }
 
     /** Crea un título grande con una línea de descripción debajo. */
@@ -493,7 +577,7 @@ public class VentanaPrincipal extends JFrame {
         panel.setOpaque(false);
         JLabel lblTitulo = new JLabel(titulo);
         JLabel lblSubtitulo = new JLabel(subtitulo);
-        lblTitulo.setFont(new Font(FUENTE, Font.BOLD, 26));
+        lblTitulo.setFont(new Font(FUENTE_TITULO, Font.BOLD, 28));
         lblTitulo.setForeground(COLOR_TEXTO);
         lblSubtitulo.setFont(new Font(FUENTE, Font.PLAIN, 13));
         lblSubtitulo.setForeground(COLOR_TEXTO_SUAVE);
@@ -507,15 +591,15 @@ public class VentanaPrincipal extends JFrame {
         JScrollPane scroll = new JScrollPane(tabla);
         scroll.setBorder(BorderFactory.createEmptyBorder());
         scroll.setViewportBorder(null);
-        scroll.getViewport().setBackground(Color.WHITE);
+        scroll.getViewport().setBackground(PAPEL);
         scroll.getVerticalScrollBar().setUnitIncrement(16);
 
         JPanel recuadro = new JPanel(new BorderLayout()) {
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = activarSuavizado(g);
-                g2.setColor(new Color(0xE5E7EB)); // borde gris
+                g2.setColor(BORDE); // borde color papel viejo
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), 18, 18);
-                g2.setColor(Color.WHITE);         // relleno blanco un poco más chico
+                g2.setColor(PAPEL);          // relleno de papel un poco más chico
                 g2.fillRoundRect(1, 1, getWidth() - 2, getHeight() - 2, 17, 17);
                 g2.dispose();
             }
@@ -531,8 +615,10 @@ public class VentanaPrincipal extends JFrame {
         JPanel tarjeta = new JPanel(new GridLayout(2, 1)) {
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = activarSuavizado(g);
-                g2.setColor(Color.WHITE);
+                g2.setColor(PAPEL);
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), 18, 18);
+                g2.setColor(BORDE);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 18, 18);
                 g2.setColor(color); // barrita de color a la izquierda
                 g2.fillRoundRect(0, 18, 6, getHeight() - 36, 6, 6);
                 g2.dispose();
@@ -541,7 +627,7 @@ public class VentanaPrincipal extends JFrame {
         tarjeta.setOpaque(false);
         tarjeta.setBorder(new EmptyBorder(18, 24, 14, 12));
 
-        numero.setFont(new Font(FUENTE, Font.BOLD, 38));
+        numero.setFont(new Font(FUENTE_TITULO, Font.BOLD, 38));
         numero.setForeground(color);
         JLabel lblNombre = new JLabel(nombre);
         lblNombre.setFont(new Font(FUENTE, Font.PLAIN, 13));
@@ -579,8 +665,8 @@ public class VentanaPrincipal extends JFrame {
         tabla.setFillsViewportHeight(true);
         tabla.setFont(new Font(FUENTE, Font.PLAIN, 14));
         tabla.setForeground(COLOR_TEXTO);
-        tabla.setBackground(Color.WHITE);
-        tabla.setSelectionBackground(new Color(0xE0E7FF));
+        tabla.setBackground(PAPEL);
+        tabla.setSelectionBackground(SELECCION);
         tabla.setSelectionForeground(COLOR_TEXTO);
 
         // Dibujo de las celdas comunes: texto alineado a la izquierda y filas alternadas
@@ -590,8 +676,8 @@ public class VentanaPrincipal extends JFrame {
                 setBorder(new EmptyBorder(0, 14, 0, 8));
                 setHorizontalAlignment(LEFT);
                 if (seleccionada) setBackground(t.getSelectionBackground());
-                else if (fila % 2 == 0) setBackground(Color.WHITE);
-                else setBackground(new Color(0xF9FAFB));
+                else if (fila % 2 == 0) setBackground(PAPEL);
+                else setBackground(PAPEL_ALT);
                 return this;
             }
         };
@@ -611,9 +697,9 @@ public class VentanaPrincipal extends JFrame {
         encabezado.setDefaultRenderer((t, valor, seleccionada, foco, fila, col) -> {
             JLabel etiqueta = new JLabel(String.valueOf(valor));
             etiqueta.setOpaque(true);
-            etiqueta.setBackground(new Color(0xEEF2FF));
-            etiqueta.setForeground(new Color(0x3730A3));
-            etiqueta.setFont(new Font(FUENTE, Font.BOLD, 13));
+            etiqueta.setBackground(ENCABEZADO);
+            etiqueta.setForeground(MARRON_TEXTO);
+            etiqueta.setFont(new Font(FUENTE_TITULO, Font.BOLD, 13));
             etiqueta.setBorder(new EmptyBorder(0, 14, 0, 8));
             return etiqueta;
         });
@@ -625,7 +711,7 @@ public class VentanaPrincipal extends JFrame {
      * verde (Disponible / Devuelto), rojo (Vencido) o amarillo (Prestado / En curso).
      */
     private static class CeldaEstado extends JLabel implements TableCellRenderer {
-        private Color colorFondoFila = Color.WHITE;
+        private Color colorFondoFila = PAPEL;
         private Color colorEtiqueta = VERDE;
 
         CeldaEstado() {
@@ -643,8 +729,8 @@ public class VentanaPrincipal extends JFrame {
 
             // El fondo de la fila tiene que coincidir con el de las otras celdas
             if (seleccionada) colorFondoFila = t.getSelectionBackground();
-            else if (fila % 2 == 0) colorFondoFila = Color.WHITE;
-            else colorFondoFila = new Color(0xF9FAFB);
+            else if (fila % 2 == 0) colorFondoFila = PAPEL;
+            else colorFondoFila = PAPEL_ALT;
             return this;
         }
 
@@ -699,14 +785,14 @@ public class VentanaPrincipal extends JFrame {
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = activarSuavizado(g);
                 // Color de fondo según el tipo de botón y si el mouse está encima
-                Color fondo = principal ? COLOR_PRINCIPAL : Color.WHITE;
-                if (encima) fondo = principal ? COLOR_PRINCIPAL.darker() : new Color(0xEEF2FF);
+                Color fondo = principal ? COLOR_PRINCIPAL : PAPEL;
+                if (encima) fondo = principal ? COLOR_PRINCIPAL.darker() : new Color(0xF3E7CC);
                 if (getModel().isPressed()) fondo = fondo.darker();
                 g2.setColor(fondo);
                 g2.fillRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 12, 12);
                 // Los botones blancos llevan un borde suave
                 if (!principal) {
-                    g2.setColor(new Color(0xC7D2FE));
+                    g2.setColor(new Color(0xD2B98C));
                     g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 12, 12);
                 }
                 g2.dispose();
@@ -719,7 +805,7 @@ public class VentanaPrincipal extends JFrame {
         boton.setFocusPainted(false);
         boton.setOpaque(false);
         boton.setFont(new Font(FUENTE, Font.BOLD, 13));
-        boton.setForeground(principal ? Color.WHITE : new Color(0x3730A3));
+        boton.setForeground(principal ? Color.WHITE : MARRON_TEXTO);
         boton.setBorder(new EmptyBorder(9, 18, 9, 18));
         boton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
@@ -753,8 +839,8 @@ public class VentanaPrincipal extends JFrame {
             setBorderPainted(false);
             setFocusPainted(false);
             setHorizontalAlignment(LEFT);
-            setFont(new Font(FUENTE, Font.BOLD, 14));
-            setForeground(new Color(0xE0E7FF));
+            setFont(new Font(FUENTE_TITULO, Font.BOLD, 14));
+            setForeground(new Color(0xF3E6CF));
             setBorder(new EmptyBorder(11, 18, 11, 10));
             setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
             setAlignmentX(LEFT_ALIGNMENT);
@@ -773,7 +859,7 @@ public class VentanaPrincipal extends JFrame {
             // Solo se pinta el fondo si está activo o el mouse está encima
             if (activo || encima) {
                 Graphics2D g2 = activarSuavizado(g);
-                g2.setColor(activo ? COLOR_MENU_ACTIVO : new Color(0x312E81));
+                g2.setColor(activo ? COLOR_MENU_ACTIVO : COLOR_MENU_HOVER);
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), 14, 14);
                 g2.dispose();
             }

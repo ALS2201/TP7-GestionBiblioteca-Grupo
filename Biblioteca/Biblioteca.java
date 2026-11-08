@@ -118,6 +118,20 @@ public class Biblioteca implements java.io.Serializable {
     }
 
     /**
+     * Quita un libro del catálogo de la biblioteca.
+     * No se puede quitar un libro que está prestado en este momento.
+     * 
+     * @param p_libro Libro a quitar
+     * @return true si se quitó, false si el libro está prestado o no pertenece a la biblioteca
+     */
+    public boolean quitarLibro(Libro p_libro) {
+        if (p_libro.prestado()) {
+            return false;
+        }
+        return this.getLibros().remove(p_libro);
+    }
+
+    /**
      * Registra un nuevo socio de tipo Estudiante y lo agrega a la biblioteca.
      * 
      * @param p_dniSocio DNI del estudiante
