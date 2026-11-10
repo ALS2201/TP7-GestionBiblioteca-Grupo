@@ -101,7 +101,8 @@ public class VentanaPrincipal extends JFrame {
 
         panelPaginas.add(crearPagina("Socios lectores", "Docentes y estudiantes registrados en la biblioteca.", tablaSocios,
             crearBoton("Nuevo docente", true, this::agregarDocente),
-            crearBoton("Nuevo estudiante", false, this::agregarEstudiante)), "Socios");
+            crearBoton("Nuevo estudiante", false, this::agregarEstudiante),
+            crearBoton("Quitar socio", false, this::quitarSocio)), "Socios");
 
         // El checkbox vuelve a cargar la tabla cada vez que se tilda o destilda
         chkSoloVencidos.setOpaque(false);
@@ -225,6 +226,26 @@ public class VentanaPrincipal extends JFrame {
         if (biblioteca.quitarLibro(libro)) {
             actualizarDatos();
             mostrarMensaje("Libro \"" + libro.getTitulo() + "\" quitado.");
+        }
+    }
+
+    /** Quita el socio seleccionado (pide confirmación; no permite quitar uno que tiene libros sin devolver). */
+    private void quitarSocio() {
+        Socio socio = socioSeleccionado();
+        if (socio == null) return;
+
+        if (socio.cantLibrosPrestados() > 0) {
+            mostrarError("No se puede quitar a " + socio.getNombre() + " porque tiene libros sin devolver.");
+            return;
+        }
+        int respuesta = JOptionPane.showConfirmDialog(this,
+                "¿Seguro que querés quitar a " + socio.getNombre() + " de la biblioteca?",
+                "Quitar socio", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+        if (respuesta != JOptionPane.YES_OPTION) return;
+
+        if (biblioteca.quitarSocio(socio)) {
+            actualizarDatos();
+            mostrarMensaje("Socio " + socio.getNombre() + " quitado.");
         }
     }
 
@@ -910,6 +931,17 @@ public class VentanaPrincipal extends JFrame {
         }
         // La fila de la tabla es la misma posición que en la lista de libros
         return biblioteca.getLibros().get(fila);
+    }
+
+    /** Devuelve el socio seleccionado en la tabla de socios, o null (con aviso) si no hay ninguno. */
+    private Socio socioSeleccionado() {
+        int fila = tablaSocios.getSelectedRow();
+        if (fila < 0) {
+            mostrarError("Seleccioná un socio de la tabla.");
+            return null;
+        }
+        // La fila de la tabla es la misma posición que en la lista de socios
+        return biblioteca.getSocios().get(fila);
     }
 
     /** Muestra un mensaje de confirmación en verde abajo de la ventana. */

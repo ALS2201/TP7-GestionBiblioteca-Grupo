@@ -132,6 +132,20 @@ public class Biblioteca implements java.io.Serializable {
     }
 
     /**
+     * Quita un socio de la biblioteca.
+     * No se puede quitar un socio que todavía tiene libros sin devolver.
+     * 
+     * @param p_socio Socio a quitar
+     * @return true si se quitó, false si tiene libros prestados o no pertenece a la biblioteca
+     */
+    public boolean quitarSocio(Socio p_socio) {
+        if (p_socio.cantLibrosPrestados() > 0) {
+            return false;
+        }
+        return this.getSocios().remove(p_socio);
+    }
+
+    /**
      * Registra un nuevo socio de tipo Estudiante y lo agrega a la biblioteca.
      * 
      * @param p_dniSocio DNI del estudiante
