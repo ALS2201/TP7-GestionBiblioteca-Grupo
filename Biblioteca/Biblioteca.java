@@ -209,21 +209,6 @@ public class Biblioteca implements java.io.Serializable {
         // la fecha queda registrada en ambas fichas.
         p_libro.ultimoPrestamo().registrarFechaDevolucion(new GregorianCalendar());
     }
- 
-    /**
-     * Busca un socio dentro de la colección utilizando su número de DNI.
-     * 
-     * @param p_dni DNI del socio a buscar
-     * @return El objeto Socio encontrado, o null si no existe en la lista
-     */
-    public Socio buscarSocio(int p_dni) {
-        for (Socio s : this.getSocios()) {
-            if (s.getDniSocio() == p_dni) {
-                return s; 
-            }
-        }
-        return null; 
-    }
 
     /**
      * Devuelve la cantidad de socios del tipo indicado ("Docente" o "Estudiante").
@@ -292,6 +277,21 @@ public class Biblioteca implements java.io.Serializable {
             throw new LibroNoPrestadoException("El libro se encuentra en la biblioteca");
         }
         return p_libro.ultimoPrestamo().getSocio().getNombre();
+    }
+
+    /**
+     * Busca un socio dentro de la colección utilizando su número de DNI.
+     * 
+     * @param p_dni DNI del socio a buscar
+     * @return El objeto Socio encontrado, o null si no existe en la lista
+     */
+    public Socio buscarSocio(int p_dni) {
+        for (Socio s : this.getSocios()) {
+            if (s.getDniSocio() == p_dni) {
+                return s; 
+            }
+        }
+        return null; 
     }
 
     // --- Métodos de Listados ---
@@ -367,4 +367,4 @@ public class Biblioteca implements java.io.Serializable {
         }
         return listado;
     }
-}
+                }
